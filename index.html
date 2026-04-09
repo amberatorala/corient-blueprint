@@ -672,7 +672,7 @@
     <div class="brand">Orala</div>
     <div class="meta">
       Blueprint · Corient<br>
-      v3 · 2026-04-09
+      v4 · 2026-04-09
     </div>
   </div>
 
@@ -680,14 +680,14 @@
   <div class="hero">
     <div class="eyebrow">Agentic system blueprint</div>
     <h1>An operating system for <em>Corient.</em></h1>
-    <p class="hero-deck">Five agent domains. Eleven workflows. One typed contract underneath them — the brief — that every agent reads from.</p>
+    <p class="hero-deck">One contract. Seven workflows. Five shared primitives. Everything else compounds.</p>
   </div>
 
   <!-- 01 DOMAINS -->
   <section>
     <span class="section-num">01 — Domains</span>
     <h2>Five agents. One contract.</h2>
-    <p class="lede">The five domains are already deployed. The brief is not a sixth domain — it is the typed schema every agent reads from. Promoted to the fabric.</p>
+    <p class="lede">Five agent domains, already deployed. Each one owns a bounded responsibility. None of them call each other directly — they read from a shared contract and emit typed events.</p>
 
     <div class="domains">
       <div class="domain">
@@ -698,27 +698,22 @@
       <div class="domain">
         <div class="domain-id">ai-campaigns</div>
         <div class="domain-name">Campaigns</div>
-        <div class="domain-desc">Takes approved creative and launches it. Variant factories, A/B, scheduling, spend guardrails. Closes the loop with ai-reports.</div>
+        <div class="domain-desc">Takes approved creative and launches it. Variant factories, A/B, scheduling, spend guardrails. Closes the loop with the learning pipeline.</div>
       </div>
       <div class="domain">
         <div class="domain-id">ai-sales</div>
         <div class="domain-name">Sales</div>
-        <div class="domain-desc">Proposals that sound like Corient. Agentic RAG over won decks, deterministic pricing, reviewer pass.</div>
+        <div class="domain-desc">Deal context, proposals, hand-off to admin on close. Deterministic pricing, reviewer pass, fresh context.</div>
       </div>
       <div class="domain">
         <div class="domain-id">ai-reports</div>
         <div class="domain-name">Reports</div>
-        <div class="domain-desc">Cross-platform metrics, anomaly detection, narrative grounded in evidence cards. No evidence, no claim.</div>
+        <div class="domain-desc">Cross-platform metrics, evidence cards, narrative grounded in the brief's success criteria. Half of the learning loop.</div>
       </div>
       <div class="domain">
         <div class="domain-id">ai-admin</div>
         <div class="domain-name">Admin</div>
-        <div class="domain-desc">Onboarding, access, internal ops. Turns a signed contract into a working engagement without human toil.</div>
-      </div>
-      <div class="domain">
-        <div class="domain-id">brief · fabric</div>
-        <div class="domain-name">The contract</div>
-        <div class="domain-desc">Not an agent. A typed schema. Lives in Notion as the human view, in Postgres as the source of truth. Every agent reads from it, writes back to it.</div>
+        <div class="domain-desc">Client cards, access, internal ops. Turns a signed contract into a working engagement without human toil.</div>
       </div>
     </div>
   </section>
@@ -726,57 +721,99 @@
   <!-- 02 WORKFLOWS -->
   <section>
     <span class="section-num">02 — Workflows</span>
-    <h2>Eleven builds.</h2>
-    <p class="lede">Each workflow is a standalone architecture. Each ships value on its own. Built in priority order, they compound into the full system.</p>
+    <h2>Seven builds.</h2>
+    <p class="lede">Each workflow is a standalone architecture. Each ships value on its own. Built in order, they compound into the full system.</p>
 
-    <!-- ============ W-01 BRIEF CONTRACT ============ -->
+    <!-- ============ W-01 THE CONTRACT ============ -->
     <div class="workflow">
       <div class="workflow-header">
         <div class="workflow-id">W-01</div>
         <div>
-          <h3 class="workflow-title">The brief contract.</h3>
-          <p class="workflow-purpose">A typed schema, not a document. Lives in the client card in Notion. Auto-updates on every signal. Classified by change type, not a confidence score.</p>
+          <h3 class="workflow-title">The contract.</h3>
+          <p class="workflow-purpose">A typed schema, not a document. Created on deal-won. Auto-updates on every signal after. Lives in the client card. Every other workflow reads from it.</p>
         </div>
       </div>
 
-      <p>Every client in Corient's Notion has a card. The brief is a typed Pydantic schema projected into that card. Meetings, emails and Slack decisions all update the same object. Notion is the human view. The typed object is the source of truth that every other workflow reads programmatically.</p>
+      <p>Every client has one card. The brief is a Pydantic schema projected into that card — Notion is the human view, Postgres is the source of truth. The workflow has two triggers: <code>deal.won</code> seeds the card and the golden set from scratch; every signal after that appends to the meeting log and classifies the diff. Nothing else works without this.</p>
 
       <div class="flow">
-        <div class="flow-label">Pipeline</div>
+        <div class="flow-label">Trigger A — Deal won (once per client)</div>
         <div class="flow-steps">
 
           <div class="step">
-            <div class="step-num">1</div>
+            <div class="step-num">A1</div>
+            <div class="step-main">
+              <strong><code>sales.deal.won</code> fires.</strong>
+              <small>Emitted the moment the contract is signed.</small>
+            </div>
+            <div class="step-tool">PandaDoc · Inngest</div>
+          </div>
+
+          <div class="step">
+            <div class="step-num">A2</div>
+            <div class="step-main">
+              <strong>Provisioning — parallel.</strong>
+              <small>Notion client card. Slack channel + Slack Connect for live requests. Drive folder. Access granted. Kickoff scheduled.</small>
+            </div>
+            <div class="step-tool">Notion · Slack<br>Drive · Cal</div>
+          </div>
+
+          <div class="step">
+            <div class="step-num">A3</div>
+            <div class="step-main">
+              <strong>First brief seeded from discovery transcript.</strong>
+              <small>The sales call becomes <code>brief.draft</code>. Two-pass extraction — structured fields first, then synthesis of the single-minded proposition.</small>
+            </div>
+            <div class="step-tool">Claude Opus</div>
+          </div>
+
+          <div class="step">
+            <div class="step-num">A4</div>
+            <div class="step-main">
+              <strong>Voice golden set workshop.</strong>
+              <small>Half-day async with the client. 20 on-brand examples collected (past posts, ads, emails). Stored as the client's eval set. This is the moat.</small>
+            </div>
+            <div class="step-tool">Notion · pgvector</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow">
+        <div class="flow-label">Trigger B — Signal (ongoing)</div>
+        <div class="flow-steps">
+
+          <div class="step">
+            <div class="step-num">B1</div>
             <div class="step-main">
               <strong>Signal fires.</strong>
-              <small>Meeting ends · email arrives · Slack decision · form submitted · manual Notion edit.</small>
+              <small>Meeting ends · email · Slack decision · form · manual Notion edit.</small>
             </div>
             <div class="step-tool">Fathom · Gmail<br>Slack · Notion</div>
           </div>
 
           <div class="step">
-            <div class="step-num">2</div>
+            <div class="step-num">B2</div>
             <div class="step-main">
-              <strong>Client router.</strong>
-              <small>Matches attendees, email domain, or channel to the correct client card. Unknown signals go to a triage queue.</small>
+              <strong>Signal triage + client router.</strong>
+              <small>First — is this a brief update, a live creative request, a complaint, or noise? Then — which client card? Unknown signals go to a human triage queue. Nothing silently drops.</small>
             </div>
-            <div class="step-tool">Claude · Inngest</div>
+            <div class="step-tool">Claude Haiku</div>
           </div>
 
           <div class="step">
-            <div class="step-num">3</div>
+            <div class="step-num">B3</div>
             <div class="step-main">
               <strong>Meeting log appended.</strong>
-              <small>Transcript summarised, decisions extracted, action items tagged. Dated entry with a link to the full transcript.</small>
+              <small>Dated entry with transcript link, extracted decisions, and action items. Always.</small>
             </div>
-            <div class="step-tool">Claude · Notion</div>
+            <div class="step-tool">Notion</div>
           </div>
 
           <div class="step">
-            <div class="step-num">4</div>
+            <div class="step-num">B4</div>
             <div class="step-main">
               <strong>Typed change classifier.</strong>
-              <small>Every diff is classified — factual (auto-merge + audit), interpretive (auto-merge + Slack notify), structural (HITL), contradictory (HITL, surface both versions). No confidence thresholds.</small>
+              <small>Every diff classified — <em>factual</em> (auto-merge + audit), <em>interpretive</em> (auto-merge + notify), <em>structural</em> (HITL), <em>contradictory</em> (HITL, surface both versions). No confidence thresholds.</small>
             </div>
             <div class="step-tool">Claude Opus</div>
           </div>
@@ -785,27 +822,18 @@
             <div class="step-num">✓</div>
             <div class="step-main">
               <strong>Review gate — structural or contradictory only.</strong>
-              <small>Slack message: "Brief update for Acme Co — structural change to deliverables. Approve, edit, or ignore." Factual and interpretive updates land silently with an audit entry.</small>
+              <small>Slack card with the specific typed reason. Factual and interpretive updates land silently with an audit trail.</small>
             </div>
             <div class="step-tool">Slack Block Kit</div>
           </div>
 
           <div class="step">
-            <div class="step-num">5</div>
+            <div class="step-num">B5</div>
             <div class="step-main">
-              <strong>Merge.</strong>
-              <small>Append-only version history. Every field carries provenance — which meeting, which email, which decision.</small>
+              <strong>Merge + emit.</strong>
+              <small>Append-only version history with provenance on every field. Event: <code>brief.updated</code>. Subscribed workflows pick up the new version on next run.</small>
             </div>
-            <div class="step-tool">Postgres · Notion</div>
-          </div>
-
-          <div class="step">
-            <div class="step-num">6</div>
-            <div class="step-main">
-              <strong>Downstream notified.</strong>
-              <small>Event: <code>brief.updated</code>. Any workflow subscribed to this client picks up the new version on next run.</small>
-            </div>
-            <div class="step-tool">Inngest</div>
+            <div class="step-tool">Postgres · Inngest</div>
           </div>
         </div>
       </div>
@@ -822,9 +850,9 @@
           <div class="metric-sub">silent updates · 30s review when structural</div>
         </div>
         <div class="metric">
-          <div class="metric-label">Interrupt reason</div>
-          <div class="metric-value">Always</div>
-          <div class="metric-sub">typed, never "low confidence"</div>
+          <div class="metric-label">Onboarding</div>
+          <div class="metric-value">Day 1</div>
+          <div class="metric-sub">first brief + golden set live before kickoff</div>
         </div>
       </div>
 
@@ -833,15 +861,15 @@
         <ul class="reuse-list">
           <li>
             <div>
-              <div class="reuse-name">n8n · Fireflies → Notion</div>
-              <div class="reuse-desc">Template 10286. Meeting transcript to structured Notion database. Adapt for client-card routing.</div>
+              <div class="reuse-name">n8n · Fireflies → Notion (10286)</div>
+              <div class="reuse-desc">Meeting transcript to structured Notion database. Adapt for client-card routing.</div>
             </div>
             <div class="reuse-tag">Template · free</div>
           </li>
           <li>
             <div>
               <div class="reuse-name">griv32/agentic-proposal-generator</div>
-              <div class="reuse-desc">Claude Agent SDK pattern for extracting structured data from discovery transcripts. Reference, not fork.</div>
+              <div class="reuse-desc">Claude Agent SDK pattern for structured extraction from discovery transcripts. Reference.</div>
             </div>
             <div class="reuse-tag">Reference · MIT</div>
           </li>
@@ -849,72 +877,10 @@
       </div>
     </div>
 
-    <!-- ============ W-02 ONBOARDING ============ -->
+    <!-- ============ W-02 STATIC ADS ============ -->
     <div class="workflow">
       <div class="workflow-header">
         <div class="workflow-id">W-02</div>
-        <div>
-          <h3 class="workflow-title">Client onboarding.</h3>
-          <p class="workflow-purpose">Deal won to working engagement. Zero human clicks. Includes the first brief draft and the client's voice golden set.</p>
-        </div>
-      </div>
-
-      <div class="flow">
-        <div class="flow-label">Pipeline</div>
-        <div class="flow-steps">
-
-          <div class="step">
-            <div class="step-num">1</div>
-            <div class="step-main">
-              <strong>Trigger — <code>sales.deal.won</code>.</strong>
-              <small>Emitted the moment the contract is signed.</small>
-            </div>
-            <div class="step-tool">PandaDoc · Inngest</div>
-          </div>
-
-          <div class="step">
-            <div class="step-num">2</div>
-            <div class="step-main">
-              <strong>Provisioning — parallel.</strong>
-              <small>Notion client card created. Slack channel. Slack Connect channel for live requests. Drive folder. Access granted. Kickoff scheduled.</small>
-            </div>
-            <div class="step-tool">Notion · Slack<br>Drive · Cal</div>
-          </div>
-
-          <div class="step">
-            <div class="step-num">3</div>
-            <div class="step-main">
-              <strong>First brief seeded.</strong>
-              <small>Discovery transcript from sales becomes <code>brief.draft</code> via W-01. Emits <code>brief.draft.created</code> before the kickoff call.</small>
-            </div>
-            <div class="step-tool">→ W-01</div>
-          </div>
-
-          <div class="step">
-            <div class="step-num">4</div>
-            <div class="step-main">
-              <strong>Voice golden set workshop.</strong>
-              <small>Half-day async workshop with the client. Collect 20 on-brand examples (past posts, ads, emails). Stored as the client's voice eval set. This is the moat.</small>
-            </div>
-            <div class="step-tool">Notion · pgvector</div>
-          </div>
-
-          <div class="step">
-            <div class="step-num">5</div>
-            <div class="step-main">
-              <strong>Kickoff email drafted.</strong>
-              <small>Warm, on-brand, personalised from the brief. Human sends.</small>
-            </div>
-            <div class="step-tool">Claude</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ============ W-03 STATIC ADS ============ -->
-    <div class="workflow">
-      <div class="workflow-header">
-        <div class="workflow-id">W-03</div>
         <div>
           <h3 class="workflow-title">Static ad production.</h3>
           <p class="workflow-purpose">Brief in, full variant matrix out. 2026 frontier models, brand assets conditioned in pre-generation, two-judge vision QA panel.</p>
@@ -931,9 +897,9 @@
             <div class="step-num">1</div>
             <div class="step-main">
               <strong>Brief pulled + winning priors loaded.</strong>
-              <small>Campaign, offer, audience, CTAs. Plus the client's winning hook patterns from W-08 feedback loop.</small>
+              <small>Campaign, offer, audience, CTAs. Plus the client's winning hook patterns from W-07 learning loop.</small>
             </div>
-            <div class="step-tool">Brief · W-08</div>
+            <div class="step-tool">Brief · W-07</div>
           </div>
 
           <div class="step">
@@ -993,10 +959,10 @@
           <div class="step block">
             <div class="step-num">⚖</div>
             <div class="step-main">
-              <strong>→ W-05 Compliance gate.</strong>
+              <strong>→ W-04 Compliance gate.</strong>
               <small>Hard wall. Claims extraction, substantiation check, platform policy, region-specific supers. Not a cap.</small>
             </div>
-            <div class="step-tool">→ W-05</div>
+            <div class="step-tool">→ W-04</div>
           </div>
 
           <div class="step">
@@ -1021,7 +987,7 @@
             <div class="step-num">8</div>
             <div class="step-main">
               <strong>Delivery.</strong>
-              <small>Meta, LinkedIn, display. Metadata logged for W-08 feedback loop.</small>
+              <small>Meta, LinkedIn, display. Metadata logged for W-07 learning loop.</small>
             </div>
             <div class="step-tool">Platform APIs</div>
           </div>
@@ -1074,10 +1040,10 @@
       </div>
     </div>
 
-    <!-- ============ W-04 REPURPOSING ============ -->
+    <!-- ============ W-03 REPURPOSING ============ -->
     <div class="workflow">
       <div class="workflow-header">
-        <div class="workflow-id">W-04</div>
+        <div class="workflow-id">W-03</div>
         <div>
           <h3 class="workflow-title">Social content<br>repurposing.</h3>
           <p class="workflow-purpose">One long-form source becomes 30+ platform-native pieces. Voice fidelity enforced by per-client golden sets, not generic rubrics.</p>
@@ -1139,9 +1105,9 @@
             <div class="step-num">5</div>
             <div class="step-main">
               <strong>Visual layer.</strong>
-              <small>Carousel slides and post visuals route through W-03. Video scripts route through W-07.</small>
+              <small>Carousel slides and post visuals route through W-02. Video scripts route through W-05.</small>
             </div>
-            <div class="step-tool">W-03 · W-07</div>
+            <div class="step-tool">W-02 · W-05</div>
           </div>
 
           <div class="step">
@@ -1156,9 +1122,9 @@
           <div class="step block">
             <div class="step-num">⚖</div>
             <div class="step-main">
-              <strong>→ W-05 Compliance gate.</strong>
+              <strong>→ W-04 Compliance gate.</strong>
             </div>
-            <div class="step-tool">→ W-05</div>
+            <div class="step-tool">→ W-04</div>
           </div>
 
           <div class="step gate">
@@ -1220,10 +1186,10 @@
       </div>
     </div>
 
-    <!-- ============ W-05 COMPLIANCE GATE ============ -->
+    <!-- ============ W-04 COMPLIANCE GATE ============ -->
     <div class="workflow">
       <div class="workflow-header">
-        <div class="workflow-id">W-05</div>
+        <div class="workflow-id">W-04</div>
         <div>
           <h3 class="workflow-title">Compliance<br>&amp; claims gate.</h3>
           <p class="workflow-purpose">A hard wall, not a cap. Every generative asset passes through before delivery. This is how agencies avoid getting sued.</p>
@@ -1240,7 +1206,7 @@
             <div class="step-num">1</div>
             <div class="step-main">
               <strong>Asset arrives.</strong>
-              <small>Final deliverable from W-03, W-04 or W-07. Before any Gate 2.</small>
+              <small>Final deliverable from W-02, W-03, W-05 or W-06. Before any Gate 2.</small>
             </div>
             <div class="step-tool">Inngest event</div>
           </div>
@@ -1302,10 +1268,10 @@
       </div>
     </div>
 
-    <!-- ============ W-06 VIDEO ADS ============ -->
+    <!-- ============ W-05 VIDEO ADS ============ -->
     <div class="workflow">
       <div class="workflow-header">
-        <div class="workflow-id">W-06</div>
+        <div class="workflow-id">W-05</div>
         <div>
           <h3 class="workflow-title">Video ad production.</h3>
           <p class="workflow-purpose">Two pipelines, chosen by brief. Native generative for 80% of output. Segment-based for talking-head UGC only.</p>
@@ -1322,9 +1288,9 @@
             <div class="step-num">1</div>
             <div class="step-main">
               <strong>Brief pulled + winning priors.</strong>
-              <small>Duration, voiceover tone, music mood, avatar ID if brand has one. Plus winning hook patterns from W-08.</small>
+              <small>Duration, voiceover tone, music mood, avatar ID if brand has one. Plus winning hook patterns from W-07.</small>
             </div>
-            <div class="step-tool">Brief · W-08</div>
+            <div class="step-tool">Brief · W-07</div>
           </div>
 
           <div class="step">
@@ -1438,9 +1404,9 @@
           <div class="step block">
             <div class="step-num">⚖</div>
             <div class="step-main">
-              <strong>→ W-05 Compliance gate.</strong>
+              <strong>→ W-04 Compliance gate.</strong>
             </div>
-            <div class="step-tool">→ W-05</div>
+            <div class="step-tool">→ W-04</div>
           </div>
 
           <div class="step gate">
@@ -1456,7 +1422,7 @@
             <div class="step-num">6</div>
             <div class="step-main">
               <strong>Delivery.</strong>
-              <small>Meta, TikTok, YouTube. Metadata logged for W-08.</small>
+              <small>Meta, TikTok, YouTube. Metadata logged for W-07.</small>
             </div>
             <div class="step-tool">Platform APIs</div>
           </div>
@@ -1509,10 +1475,10 @@
       </div>
     </div>
 
-    <!-- ============ W-07 LIVE REQUESTS ============ -->
+    <!-- ============ W-06 LIVE REQUESTS ============ -->
     <div class="workflow">
       <div class="workflow-header">
-        <div class="workflow-id">W-07</div>
+        <div class="workflow-id">W-06</div>
         <div>
           <h3 class="workflow-title">Live creative<br>requests.</h3>
           <p class="workflow-purpose">The thousand papercuts workflow. Between briefs, clients ask for small things constantly. This is where the leverage ratio lives.</p>
@@ -1538,7 +1504,7 @@
             <div class="step-num">2</div>
             <div class="step-main">
               <strong>Classifier.</strong>
-              <small>Is this a new concept (route to normal W-03/W-06) or a micro-job (edit existing, new cut, new variant)? Micro-jobs go fast lane.</small>
+              <small>Is this a new concept (route to normal W-02/W-05) or a micro-job (edit existing, new cut, new variant)? Micro-jobs go fast lane.</small>
             </div>
             <div class="step-tool">Claude Haiku</div>
           </div>
@@ -1558,15 +1524,15 @@
               <strong>Fast-lane generation.</strong>
               <small>Skips concept stage. Runs a single mutation — new headline, new cut, new aspect. Reuses brand asset bundle.</small>
             </div>
-            <div class="step-tool">W-03 · W-06</div>
+            <div class="step-tool">W-02 · W-05</div>
           </div>
 
           <div class="step block">
             <div class="step-num">⚖</div>
             <div class="step-main">
-              <strong>→ W-05 Compliance gate.</strong>
+              <strong>→ W-04 Compliance gate.</strong>
             </div>
-            <div class="step-tool">→ W-05</div>
+            <div class="step-tool">→ W-04</div>
           </div>
 
           <div class="step gate">
@@ -1608,27 +1574,29 @@
       </div>
     </div>
 
-    <!-- ============ W-08 CREATIVE FEEDBACK LOOP ============ -->
+    <!-- ============ W-07 LEARNING LOOP ============ -->
     <div class="workflow">
       <div class="workflow-header">
-        <div class="workflow-id">W-08</div>
+        <div class="workflow-id">W-07</div>
         <div>
-          <h3 class="workflow-title">Creative performance<br>feedback loop.</h3>
-          <p class="workflow-purpose">Every ad is a labelled training example. Winning patterns feed back into the next concept round. This is the workflow that separates a generation factory from an agency.</p>
+          <h3 class="workflow-title">The learning loop.</h3>
+          <p class="workflow-purpose">One shared data pipeline, two surfaces. Client reports are the human view of the same learning that feeds the next round of creative. The compounding engine.</p>
         </div>
       </div>
 
+      <p>Reports and the creative feedback loop share the same pipeline — platform metrics, element decomposition, win/loss tagging. Splitting them into separate workflows doubles the plumbing and hides the connection. Here they are one. What the agency learns becomes what the agency ships next week. What the client sees is the same truth in narrative form.</p>
+
       <div class="flow">
-        <div class="flow-label">Pipeline</div>
+        <div class="flow-label">Shared pipeline</div>
         <div class="flow-steps">
 
           <div class="step">
             <div class="step-num">1</div>
             <div class="step-main">
               <strong>Daily metrics pull.</strong>
-              <small>Meta, TikTok, Google Ads, LinkedIn. Creative-level performance tied to asset_id from W-03/W-06.</small>
+              <small>GA4, Meta, TikTok, Google Ads, LinkedIn → canonical <code>MetricPoint</code> → Postgres. Creative-level performance tied to <code>asset_id</code>.</small>
             </div>
-            <div class="step-tool">Platform APIs</div>
+            <div class="step-tool">n8n · Postgres</div>
           </div>
 
           <div class="step">
@@ -1643,14 +1611,20 @@
           <div class="step">
             <div class="step-num">3</div>
             <div class="step-main">
-              <strong>Win/loss tagging.</strong>
-              <small>Each creative scored against CPA threshold from the brief. Winners and losers labelled.</small>
+              <strong>Win/loss tagging + evidence cards.</strong>
+              <small>Win/loss scored against the brief's CPA threshold. Anomalies detected statistically (z-score, 3-week moving average). Each anomaly becomes an <em>evidence card</em> — timestamp, metric, magnitude, tracked context.</small>
             </div>
-            <div class="step-tool">Code · thresholds</div>
+            <div class="step-tool">Code</div>
           </div>
+        </div>
+      </div>
+
+      <div class="flow">
+        <div class="flow-label">Surface A — Priors for the next round of creative</div>
+        <div class="flow-steps">
 
           <div class="step">
-            <div class="step-num">4</div>
+            <div class="step-num">A1</div>
             <div class="step-main">
               <strong>Pattern store update.</strong>
               <small>Two writes: per-client winning patterns (Mem0 namespace) and org-level pattern memory (pgvector). Every winning ad across all clients contributes anonymously.</small>
@@ -1659,92 +1633,34 @@
           </div>
 
           <div class="step">
-            <div class="step-num">5</div>
+            <div class="step-num">A2</div>
             <div class="step-main">
-              <strong>Priors injected downstream.</strong>
-              <small>Next W-03/W-06 concept stage receives the client's proven hooks plus category-level patterns from the org store. Empirical priors replace cold starts.</small>
+              <strong>Injected into next W-02/W-05 concept stage.</strong>
+              <small>The client's proven hooks plus category-level patterns from the org store become priors. Empirical priors replace cold starts.</small>
             </div>
-            <div class="step-tool">→ W-03 · W-06</div>
-          </div>
-
-          <div class="step">
-            <div class="step-num">6</div>
-            <div class="step-main">
-              <strong>Weekly digest.</strong>
-              <small>Per-client Slack post: "Your winning hook pattern this week. Suggested next tests." Radical transparency on what the system learned.</small>
-            </div>
-            <div class="step-tool">Slack</div>
+            <div class="step-tool">→ W-02 · W-05</div>
           </div>
         </div>
       </div>
-
-      <div class="metrics">
-        <div class="metric">
-          <div class="metric-label">Cold start</div>
-          <div class="metric-value">Gone</div>
-          <div class="metric-sub">after 50+ ads</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label">Pattern reuse</div>
-          <div class="metric-value">Org-wide</div>
-          <div class="metric-sub">new clients inherit priors</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label">Compounding</div>
-          <div class="metric-value">Every ad</div>
-          <div class="metric-sub">improves the next round</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ============ W-09 REPORTS ============ -->
-    <div class="workflow">
-      <div class="workflow-header">
-        <div class="workflow-id">W-09</div>
-        <div>
-          <h3 class="workflow-title">Client reports.</h3>
-          <p class="workflow-purpose">Evidence cards, not free prose. Every claim cites a specific metric drop, a creative refresh date, or a tracked platform incident. No evidence, no claim.</p>
-        </div>
-      </div>
-
-      <p>Free narrative synthesis from metrics is the highest hallucination risk in the entire system. An agent saying "TikTok performance dropped because of creative fatigue" when the real cause was a Meta tracking outage is the kind of thing that ends a retainer. The fix is structural: the LLM fills slots in a constrained template, and every slot must cite a specific evidence card.</p>
 
       <div class="flow">
-        <div class="flow-label">Pipeline</div>
+        <div class="flow-label">Surface B — Client report</div>
         <div class="flow-steps">
 
           <div class="step">
-            <div class="step-num">1</div>
-            <div class="step-main">
-              <strong>Unified metrics pull.</strong>
-              <small>GA4, Meta, TikTok, Google Ads, LinkedIn → canonical <code>MetricPoint</code> → Postgres.</small>
-            </div>
-            <div class="step-tool">n8n · Postgres</div>
-          </div>
-
-          <div class="step">
-            <div class="step-num">2</div>
-            <div class="step-main">
-              <strong>Anomaly detection.</strong>
-              <small>Statistical — z-score, 3-week moving average. Produces <em>evidence cards</em>: timestamp, metric, magnitude, tracked context (creative refresh, platform incident, budget change).</small>
-            </div>
-            <div class="step-tool">Code</div>
-          </div>
-
-          <div class="step">
-            <div class="step-num">3</div>
+            <div class="step-num">B1</div>
             <div class="step-main">
               <strong>Deliverable inventory.</strong>
-              <small>Query Notion for the period's completed items tagged to the brief.</small>
+              <small>Query Notion for the period's completed items tagged to the brief. Clients forget what you shipped — showing it moves NPS.</small>
             </div>
             <div class="step-tool">Notion</div>
           </div>
 
           <div class="step">
-            <div class="step-num">4</div>
+            <div class="step-num">B2</div>
             <div class="step-main">
               <strong>Constrained slot-filling.</strong>
-              <small>Claude fills templated slots: <code>{anomaly}</code> <code>{magnitude}</code> <code>{likely_cause_from_evidence}</code> <code>{recommended_action}</code>. Every cause must cite an evidence card. No evidence → no claim. Hallucination becomes structurally impossible.</small>
+              <small>Claude fills templated slots: <code>{anomaly}</code>, <code>{magnitude}</code>, <code>{likely_cause_from_evidence}</code>, <code>{recommended_action}</code>. Every claim must cite an evidence card. No evidence → no claim. Hallucination becomes structurally impossible.</small>
             </div>
             <div class="step-tool">Claude Sonnet</div>
           </div>
@@ -1753,19 +1669,37 @@
             <div class="step-num">✓</div>
             <div class="step-main">
               <strong>Human review.</strong>
-              <small>Reports are trust artefacts. Human always sees the final narrative.</small>
+              <small>Reports are trust artefacts. Human always sees the final narrative. Numbers are already correct.</small>
             </div>
             <div class="step-tool">Notion</div>
           </div>
 
           <div class="step">
-            <div class="step-num">5</div>
+            <div class="step-num">B3</div>
             <div class="step-main">
-              <strong>Delivery.</strong>
-              <small>Branded PDF. Email TL;DR. Live Notion embed.</small>
+              <strong>Dual delivery.</strong>
+              <small>Branded PDF to the client. Weekly Slack digest: "Your winning hook this week. Suggested next tests." Radical transparency on what the system learned.</small>
             </div>
-            <div class="step-tool">React-PDF</div>
+            <div class="step-tool">React-PDF · Slack</div>
           </div>
+        </div>
+      </div>
+
+      <div class="metrics">
+        <div class="metric">
+          <div class="metric-label">Cold start</div>
+          <div class="metric-value">Gone</div>
+          <div class="metric-sub">after 50+ ads per client</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Pattern reuse</div>
+          <div class="metric-value">Org-wide</div>
+          <div class="metric-sub">new clients inherit priors</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Hallucination risk</div>
+          <div class="metric-value">Zero</div>
+          <div class="metric-sub">no evidence, no claim</div>
         </div>
       </div>
 
@@ -1775,176 +1709,18 @@
           <li>
             <div>
               <div class="reuse-name">AgriciDaniel/claude-ads</div>
-              <div class="reuse-desc">~1.6k★. Claude Skill — 186 checks across Google, Meta, YouTube, LinkedIn, TikTok, Microsoft Ads. The keystone of W-09.</div>
-            </div>
-            <div class="reuse-tag">Install · MIT</div>
-          </li>
-          <li>
-            <div>
-              <div class="reuse-name">AgriciDaniel/claude-seo</div>
-              <div class="reuse-desc">SEO audit skill. 19 sub-skills, 12 subagents. Adjacent domain, same author.</div>
+              <div class="reuse-desc">~1.6k★. Claude Skill — 186 checks across Google, Meta, YouTube, LinkedIn, TikTok, Microsoft Ads. The keystone of this workflow.</div>
             </div>
             <div class="reuse-tag">Install · MIT</div>
           </li>
           <li>
             <div>
               <div class="reuse-name">google/ads-api-report-fetcher</div>
-              <div class="reuse-desc">Official Google Ads extraction. Data primitive under the narrative layer.</div>
+              <div class="reuse-desc">Official Google Ads extraction. The data primitive under everything above.</div>
             </div>
             <div class="reuse-tag">Apache 2</div>
           </li>
         </ul>
-      </div>
-    </div>
-
-    <!-- ============ W-10 PROPOSALS ============ -->
-    <div class="workflow">
-      <div class="workflow-header">
-        <div class="workflow-id">W-10</div>
-        <div>
-          <h3 class="workflow-title">Proposal generation.</h3>
-          <p class="workflow-purpose">Template-based with LLM-filled slots. Deterministic pricing stays out of the LLM. Same-day turnaround, zero AI slop.</p>
-        </div>
-      </div>
-
-      <p>Free RAG-grounded writing over past proposals hallucinates boilerplate from competing clients. The fix is templates with slotted generation — section by section, each slot filled from the brief plus retrieved exemplars. Pricing stays deterministic because the one place stochastic reasoning has zero upside and lawsuit-grade downside is cost.</p>
-
-      <div class="flow">
-        <div class="flow-label">Pipeline</div>
-        <div class="flow-steps">
-
-          <div class="step">
-            <div class="step-num">1</div>
-            <div class="step-main">
-              <strong>Trigger — deal qualified in Attio.</strong>
-            </div>
-            <div class="step-tool">Attio</div>
-          </div>
-
-          <div class="step">
-            <div class="step-num">2</div>
-            <div class="step-main">
-              <strong>Template selection.</strong>
-              <small>Based on deal size, industry, service line. Each template has a fixed section order and slotted generation points.</small>
-            </div>
-            <div class="step-tool">Template library</div>
-          </div>
-
-          <div class="step">
-            <div class="step-num">3</div>
-            <div class="step-main">
-              <strong>Retrieval — won only.</strong>
-              <small>pgvector filters: <code>outcome=won AND industry~client.industry</code>. Lost proposals never retrieved for generation.</small>
-            </div>
-            <div class="step-tool">pgvector · Cohere</div>
-          </div>
-
-          <div class="step">
-            <div class="step-num">4</div>
-            <div class="step-main">
-              <strong>Parallel slot filling.</strong>
-              <small>One Sonnet call per slot. Each fed the template block + 3 exemplar answers from won proposals + brief context. Few-shot beats free generation.</small>
-            </div>
-            <div class="step-tool">Claude Sonnet</div>
-          </div>
-
-          <div class="step">
-            <div class="step-num">5</div>
-            <div class="step-main">
-              <strong>Deterministic pricing.</strong>
-              <small>Rules evaluated from <code>brief.deliverables[]</code> in code. The LLM writes narrative around numbers, never invents them.</small>
-            </div>
-            <div class="step-tool">pricing.json</div>
-          </div>
-
-          <div class="step">
-            <div class="step-num">6</div>
-            <div class="step-main">
-              <strong>Reviewer pass — fresh context.</strong>
-              <small>Second Opus call with a different prompt scores against a rubric: voice, concrete claims, no filler, pricing math. Rewrites flagged sections.</small>
-            </div>
-            <div class="step-tool">Claude Opus</div>
-          </div>
-
-          <div class="step gate">
-            <div class="step-num">✓</div>
-            <div class="step-main">
-              <strong>Human approval.</strong>
-              <small>Full draft in Notion. Inline edits, then send.</small>
-            </div>
-            <div class="step-tool">Notion</div>
-          </div>
-
-          <div class="step">
-            <div class="step-num">7</div>
-            <div class="step-main">
-              <strong>Delivery.</strong>
-              <small>PandaDoc send. Attio stage updated.</small>
-            </div>
-            <div class="step-tool">PandaDoc · Attio</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ============ W-11 COMPETITOR INTEL ============ -->
-    <div class="workflow">
-      <div class="workflow-header">
-        <div class="workflow-id">W-11</div>
-        <div>
-          <h3 class="workflow-title">Competitor<br>&amp; trend intelligence.</h3>
-          <p class="workflow-purpose">Top creative directors don't work blind. Weekly ambient scan of what's winning in each client's category.</p>
-        </div>
-      </div>
-
-      <div class="flow">
-        <div class="flow-label">Pipeline</div>
-        <div class="flow-steps">
-
-          <div class="step">
-            <div class="step-num">1</div>
-            <div class="step-main">
-              <strong>Weekly cron per client.</strong>
-            </div>
-            <div class="step-tool">Inngest cron</div>
-          </div>
-
-          <div class="step">
-            <div class="step-num">2</div>
-            <div class="step-main">
-              <strong>Scrape.</strong>
-              <small>Meta Ad Library, TikTok Creative Center, competitor landing pages via Apify. Optionally Foreplay.co if budget allows.</small>
-            </div>
-            <div class="step-tool">Apify</div>
-          </div>
-
-          <div class="step">
-            <div class="step-num">3</div>
-            <div class="step-main">
-              <strong>Embedding diff vs last week.</strong>
-              <small>New creative, new hooks, new formats. Anything meaningfully different.</small>
-            </div>
-            <div class="step-tool">pgvector</div>
-          </div>
-
-          <div class="step">
-            <div class="step-num">4</div>
-            <div class="step-main">
-              <strong>Digest written to brief context.</strong>
-              <small>"What's working in your category this week." Feeds into the next W-03/W-06 concept round as ambient signal.</small>
-            </div>
-            <div class="step-tool">Brief · Claude</div>
-          </div>
-
-          <div class="step">
-            <div class="step-num">5</div>
-            <div class="step-main">
-              <strong>Slack post in client channel.</strong>
-              <small>"Three competitor hooks worth stealing." Radical transparency on what we're tracking.</small>
-            </div>
-            <div class="step-tool">Slack</div>
-          </div>
-        </div>
       </div>
     </div>
 
@@ -1953,97 +1729,65 @@
   <!-- 03 PRIORITY -->
   <section>
     <span class="section-num">03 — Build order</span>
-    <h2>Eleven workflows. One order.</h2>
-    <p class="lede">Not alphabetical. Not by domain. Ordered so each workflow unlocks the next and nothing ships without the contract underneath.</p>
+    <h2>Seven workflows. One order.</h2>
+    <p class="lede">Ordered so each workflow unlocks the next and nothing ships without the contract underneath.</p>
 
     <div class="priority">
       <div class="priority-row">
         <div class="priority-num">01</div>
         <div class="priority-title">
-          The brief contract
-          <small>Nothing else works without it. Build schema, projector to Notion, typed change classifier.</small>
+          The contract
+          <small>Nothing else works without it. Typed schema, Notion projection, signal triage, change classifier. Handles onboarding (deal won) and ongoing updates in one workflow.</small>
         </div>
-        <div class="priority-tag">Fabric</div>
+        <div class="priority-tag">Foundation</div>
       </div>
       <div class="priority-row">
         <div class="priority-num">02</div>
         <div class="priority-title">
-          Client onboarding
-          <small>Cheap, low-risk. Gets first client live. Proves the brief flow end-to-end. Seeds the voice golden set.</small>
+          Static ad production
+          <small>Highest visible value. Wins the renewal conversation. 2–4 hours for 40+ assets per campaign.</small>
         </div>
-        <div class="priority-tag">Foundational</div>
+        <div class="priority-tag">Revenue</div>
       </div>
       <div class="priority-row">
         <div class="priority-num">03</div>
         <div class="priority-title">
-          Static ad production
-          <small>Highest visible value to clients. Wins the renewal conversation.</small>
+          Social repurposing
+          <small>Highest leverage per dollar of compute. Voice golden sets are the moat. One long-form source → 30+ pieces.</small>
         </div>
-        <div class="priority-tag">Revenue</div>
+        <div class="priority-tag">Leverage</div>
       </div>
       <div class="priority-row">
         <div class="priority-num">04</div>
         <div class="priority-title">
           Compliance &amp; claims gate
-          <small>Build before W-04 ships at scale. Liability is non-negotiable.</small>
+          <small>Hard wall before anything ships at scale. Liability is non-negotiable.</small>
         </div>
         <div class="priority-tag">Risk</div>
       </div>
       <div class="priority-row">
         <div class="priority-num">05</div>
         <div class="priority-title">
-          Social repurposing
-          <small>Highest leverage per dollar of compute. Voice golden sets are the moat.</small>
-        </div>
-        <div class="priority-tag">Leverage</div>
-      </div>
-      <div class="priority-row">
-        <div class="priority-num">06</div>
-        <div class="priority-title">
           Video ad production
-          <small>Defer until statics are stable. Video is harder to QA and burns more on retries.</small>
+          <small>Defer until statics and compliance are stable. Two pipelines — native generative as default, segment-based for talking-head.</small>
         </div>
         <div class="priority-tag">Scale</div>
       </div>
       <div class="priority-row">
-        <div class="priority-num">07</div>
-        <div class="priority-title">
-          Creative performance feedback loop
-          <small>Build once W-03 has produced 50+ ads with measurable performance. Without data the loop has nothing to learn from.</small>
-        </div>
-        <div class="priority-tag">Compounding</div>
-      </div>
-      <div class="priority-row">
-        <div class="priority-num">08</div>
-        <div class="priority-title">
-          Client reports
-          <small>Build after W-08 feeds it. A report without the feedback loop is a dashboard screenshot with adjectives.</small>
-        </div>
-        <div class="priority-tag">Retention</div>
-      </div>
-      <div class="priority-row">
-        <div class="priority-num">09</div>
+        <div class="priority-num">06</div>
         <div class="priority-title">
           Live creative requests
-          <small>Unlocks the leverage ratio. Build only once W-03 and W-06 are battle-tested — this stresses them.</small>
+          <small>Unlocks the leverage ratio. Build only once W-02 and W-05 are battle-tested — this stresses them.</small>
         </div>
         <div class="priority-tag">Leverage</div>
       </div>
       <div class="priority-row">
-        <div class="priority-num">10</div>
+        <div class="priority-num">07</div>
         <div class="priority-title">
-          Proposal generation
-          <small>Nice to have. Adrian can write proposals manually for the first 5 clients.</small>
+          The learning loop
+          <small>Build once 50+ ads have shipped with measurable performance. Both surfaces — reports and creative priors — come online together. The compounding engine.</small>
         </div>
-        <div class="priority-tag">Optional</div>
-      </div>
-      <div class="priority-row">
-        <div class="priority-num">11</div>
-        <div class="priority-title">
-          Competitor &amp; trend intelligence
-          <small>Highest "interesting demo" risk, lowest immediate ROI. Build last.</small>
-        </div>
-        <div class="priority-tag">Ambient</div>
+        <div class="priority-tag">Compounding</div>
       </div>
     </div>
   </section>
@@ -2060,44 +1804,29 @@
 
     <div class="domains">
       <div class="domain">
-        <div class="domain-id">brief contract</div>
-        <div class="domain-name">Typed schema</div>
-        <div class="domain-desc">Pydantic schema in Postgres, Notion projection for humans. Every workflow reads from it programmatically. Not freeform text.</div>
+        <div class="domain-id">01 · contract</div>
+        <div class="domain-name">The contract</div>
+        <div class="domain-desc">One typed Pydantic object per engagement — the brief, the envelope, the lineage. Append-only with provenance on every field. Notion is the human view. Every workflow reads from it, writes back to it. No agent paraphrases another.</div>
       </div>
       <div class="domain">
-        <div class="domain-id">job envelope</div>
-        <div class="domain-name">Shared state</div>
-        <div class="domain-desc">Append-only object per engagement. No agent paraphrases another. Hold the line on this during implementation.</div>
+        <div class="domain-id">02 · memory &amp; evals</div>
+        <div class="domain-name">What the agency knows</div>
+        <div class="domain-desc">Per-client voice golden sets (20 hand-curated examples, built in onboarding) plus org-level pattern memory (winning hooks across every client, anonymised). New clients inherit day-one priors. The compounding asset.</div>
       </div>
       <div class="domain">
-        <div class="domain-id">memory</div>
-        <div class="domain-name">Per-client + org</div>
-        <div class="domain-desc">Mem0 per-client. Postgres + pgvector for org-level pattern memory — winning hooks across every client, anonymised. New clients inherit day-one priors.</div>
+        <div class="domain-id">03 · skills</div>
+        <div class="domain-name">Versioned capability</div>
+        <div class="domain-desc">Every skill has a schema, a test, a permission scope, a semver. No skill without a test. Grounded in the anthropics/skills format.</div>
       </div>
       <div class="domain">
-        <div class="domain-id">voice golden sets</div>
-        <div class="domain-name">Per-client eval</div>
-        <div class="domain-desc">20 hand-curated examples per client. Built in onboarding. Scored by embedding distance + rubric. The single biggest content quality lever.</div>
+        <div class="domain-id">04 · hitl</div>
+        <div class="domain-name">Approval gates</div>
+        <div class="domain-desc">Caps, not walls. Batched reviews. Rich Slack packets. Interrupt-and-resume via Inngest. The compliance gate (W-04) is the only hard wall.</div>
       </div>
       <div class="domain">
-        <div class="domain-id">skills registry</div>
-        <div class="domain-name">Versioned, tested</div>
-        <div class="domain-desc">Every skill has a schema, a test, a permission scope, a semver. No skill without a test.</div>
-      </div>
-      <div class="domain">
-        <div class="domain-id">hitl</div>
-        <div class="domain-name">Caps, not walls</div>
-        <div class="domain-desc">Batched reviews. Rich Slack packets. Interrupt-and-resume. Compliance gate (W-05) is the only hard wall.</div>
-      </div>
-      <div class="domain">
-        <div class="domain-id">cost telemetry</div>
-        <div class="domain-name">Per-deliverable</div>
-        <div class="domain-desc">Cost per winning static, per qualified report, per signed proposal. Priced from Langfuse traces. Tells us which workflows are actually profitable.</div>
-      </div>
-      <div class="domain">
-        <div class="domain-id">meta-improvement loop</div>
-        <div class="domain-name">Weekly</div>
-        <div class="domain-desc">Cron pulls all human edits to agent output. Clusters them. If three clients in one week edited "headline too long" on W-03, the headline prompt needs an update. The agent that improves other agents.</div>
+        <div class="domain-id">05 · observability</div>
+        <div class="domain-name">Traces, cost, improvement</div>
+        <div class="domain-desc">Langfuse traces every LLM call. Cost rolled up per deliverable so we know which workflows are actually profitable. Weekly cron clusters human edits to agent output and updates prompts — the agent that improves other agents.</div>
       </div>
     </div>
 
@@ -2120,19 +1849,15 @@
 
         <div class="manifest-item">
           <strong>gyoridavid/short-video-maker</strong>
-          <span>1.1k★ · Pipeline B video foundation in W-06. Swap Kokoro → ElevenLabs, Pexels → Runway. Saves 3–4 weeks.</span>
+          <span>1.1k★ · Pipeline B video foundation in W-05. Swap Kokoro → ElevenLabs, Pexels → Runway. Saves 3–4 weeks.</span>
         </div>
         <div class="manifest-item">
           <strong>AgriciDaniel/claude-ads</strong>
-          <span>~1.6k★ · The keystone of W-09. 186 checks across every major ad platform. Ships as a Claude Skill.</span>
+          <span>~1.6k★ · The keystone of W-07 learning loop. 186 checks across every major ad platform. Ships as a Claude Skill.</span>
         </div>
         <div class="manifest-item">
           <strong>AgriciDaniel/claude-seo</strong>
           <span>Install alongside claude-ads. SEO audit skill, same pattern.</span>
-        </div>
-        <div class="manifest-item">
-          <strong>langchain-ai/open_deep_research</strong>
-          <span>11k★ · Research engine under W-10 proposals. LangGraph-native. Reuse the graph, rewrite composition.</span>
         </div>
         <div class="manifest-item">
           <strong>inngest/agent-kit</strong>
@@ -2149,29 +1874,29 @@
 
         <div class="manifest-item">
           <strong>10286 · Meeting → Notion + Slack</strong>
-          <span>W-01 brief foundation. Adapt for client-card routing.</span>
+          <span>W-01 contract foundation. Adapt for client-card routing.</span>
         </div>
         <div class="manifest-item">
           <strong>6268 · HeyGen + GPT-4 end-to-end</strong>
-          <span>W-06 Pipeline B avatar video reference.</span>
+          <span>W-05 Pipeline B avatar video reference.</span>
         </div>
         <div class="manifest-item">
           <strong>11599 · Blog + YouTube → social</strong>
-          <span>W-04 extraction + reformatting scaffold.</span>
+          <span>W-03 extraction + reformatting scaffold.</span>
         </div>
         <div class="manifest-item">
           <strong>5386 · Weekly Meta Ads Report</strong>
-          <span>W-09 baseline for automated narrative reports.</span>
+          <span>W-07 baseline for narrative reports.</span>
         </div>
         <div class="manifest-item">
           <strong>14201 · Product photos + videos from reference</strong>
-          <span>W-03 brand-asset-conditioned product pipeline.</span>
+          <span>W-02 brand-asset-conditioned product pipeline.</span>
         </div>
       </div>
     </div>
 
     <h4 style="margin-top: 80px;">What we build ourselves</h4>
-    <p style="margin-top: 16px;">The typed brief schema and its Notion projection. The typed change classifier in W-01. The Job Envelope. The per-client voice golden set workflow. The two-judge vision QA panel. The compliance gate policy brain in W-05. The cross-workflow chaining. The org-level pattern memory in W-08. The evidence-card reporting template in W-09. The meta-improvement loop. Everything else is composition.</p>
+    <p style="margin-top: 16px;">The typed contract schema and its Notion projection. The signal triage router and the typed change classifier in W-01. The per-client voice golden set workflow. The two-judge vision QA panel in W-02. The compliance policy brain in W-04. The cross-workflow chaining. The org-level pattern memory and evidence-card templates in W-07. The weekly meta-improvement cron. Everything else is composition.</p>
   </section>
 
   <!-- 06 ROADMAP -->
@@ -2183,12 +1908,11 @@
     <div class="phase">
       <div class="phase-label">Phase 01 · Days 1–30</div>
       <div>
-        <div class="phase-title">Contract &amp; onboarding.</div>
+        <div class="phase-title">The contract.</div>
         <ul class="phase-list">
           <li>Inngest installed. Event bus defined. Langfuse tracing from day one.</li>
-          <li><strong>W-01 Brief contract</strong> ships. Typed schema, Notion projection, change classifier. The foundation everything else reads from.</li>
-          <li><strong>W-02 Onboarding</strong> ships. First client live end-to-end. Voice golden set workshop lands.</li>
-          <li>Skills registry bootstrapped with shared primitives.</li>
+          <li><strong>W-01 The contract</strong> ships both triggers — deal-won provisioning and ongoing signal updates. First client live end-to-end with voice golden set.</li>
+          <li>Skills registry bootstrapped with shared primitives (Notion, Slack, Drive).</li>
         </ul>
       </div>
     </div>
@@ -2196,11 +1920,12 @@
     <div class="phase">
       <div class="phase-label">Phase 02 · Days 31–60</div>
       <div>
-        <div class="phase-title">Statics &amp; compliance.</div>
+        <div class="phase-title">Statics, social, compliance.</div>
         <ul class="phase-list">
-          <li><strong>W-03 Static ads</strong> ships. Nano Banana Pro + FLUX.2, brand asset conditioning, two-judge vision QA.</li>
-          <li><strong>W-05 Compliance gate</strong> ships. Hard wall live before anything delivers at scale.</li>
-          <li>Cost telemetry per-deliverable live. Golden eval sets per workflow in CI.</li>
+          <li><strong>W-02 Static ads</strong> ships. Nano Banana Pro + FLUX.2, brand asset conditioning, two-judge vision QA panel.</li>
+          <li><strong>W-03 Social repurposing</strong> ships. Calls W-02 for visuals. Golden-set voice scoring catches drift.</li>
+          <li><strong>W-04 Compliance gate</strong> ships. Hard wall live before anything delivers at scale.</li>
+          <li>Cost-per-deliverable telemetry live.</li>
         </ul>
       </div>
     </div>
@@ -2208,12 +1933,11 @@
     <div class="phase">
       <div class="phase-label">Phase 03 · Days 61–90</div>
       <div>
-        <div class="phase-title">Social, video, feedback.</div>
+        <div class="phase-title">Video and live requests.</div>
         <ul class="phase-list">
-          <li><strong>W-04 Social repurposing</strong> ships. Calls W-03 for visuals. Golden-set voice scoring.</li>
-          <li><strong>W-06 Video ads</strong> ships with both pipelines — native generative as default, segment-based for talking-head.</li>
-          <li><strong>W-08 Feedback loop</strong> starts ingesting once W-03 has produced 50+ ads with measured performance.</li>
-          <li><strong>W-09 Reports</strong> ships with evidence-card templates.</li>
+          <li><strong>W-05 Video ads</strong> ships with both pipelines — native generative as default, segment-based for talking-head.</li>
+          <li><strong>W-06 Live creative requests</strong> ships. Fast-lane intake through battle-tested W-02 and W-05.</li>
+          <li>Per-client dashboards shipped — radical transparency on the agent system.</li>
         </ul>
       </div>
     </div>
@@ -2221,21 +1945,40 @@
     <div class="phase">
       <div class="phase-label">Phase 04 · Days 91+</div>
       <div>
-        <div class="phase-title">Compounding.</div>
+        <div class="phase-title">The learning loop.</div>
         <ul class="phase-list">
-          <li><strong>W-07 Live requests</strong> ships. Fast-lane intake through battle-tested W-03 and W-06.</li>
+          <li><strong>W-07 The learning loop</strong> ships. Both surfaces — reports and creative priors — come online together once 50+ ads have measured performance.</li>
           <li>Org-level pattern memory populated. New clients inherit priors from day one.</li>
-          <li>Meta-improvement loop live. Weekly trace clustering → prompt updates.</li>
-          <li><strong>W-10 Proposals</strong> and <strong>W-11 Competitor intel</strong> built if volume justifies.</li>
-          <li>Per-client dashboards shipped — radical transparency on the agent system.</li>
+          <li>Weekly meta-improvement cron live. Human edits cluster into prompt updates.</li>
+          <li>Optional additions from the appendix built if volume justifies.</li>
         </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 07 APPENDIX -->
+  <section>
+    <span class="section-num">07 — Appendix</span>
+    <h2>Deferred.</h2>
+    <p class="lede">Two workflows that belong in the system eventually, but aren't in the core seven. Built only when the volume justifies the complexity.</p>
+
+    <div class="manifest">
+      <div class="manifest-col">
+        <h4>A · Proposal generation</h4>
+        <p style="font-size: 14px; margin-top: 16px;">Template-based with LLM-filled slots. pgvector retrieval over won proposals filtered by <code>outcome=won AND industry~client.industry</code>. Parallel slot filling. Deterministic pricing stays out of the LLM — rules evaluated from <code>brief.deliverables[]</code> in code. Reviewer pass in fresh context. Same-day turnaround when built.</p>
+        <p style="font-size: 13px; color: var(--muted); margin-top: 12px;">Build when: deal volume exceeds ~3 proposals/week or Adrian is the bottleneck.</p>
+      </div>
+      <div class="manifest-col">
+        <h4>B · Competitor &amp; trend intelligence</h4>
+        <p style="font-size: 14px; margin-top: 16px;">Weekly cron per client. Apify scrapes Meta Ad Library, TikTok Creative Center, competitor landing pages. Embedding diff vs last week identifies what's new. Digest written to brief context and posted as a weekly "three competitor hooks worth stealing" Slack message to the client channel.</p>
+        <p style="font-size: 13px; color: var(--muted); margin-top: 12px;">Build when: W-07 is mature and the core seven are stable.</p>
       </div>
     </div>
   </section>
 
   <footer>
     <div>Orala · Blueprint · Corient</div>
-    <div>v3 · 2026-04-09</div>
+    <div>v4 · 2026-04-09</div>
   </footer>
 
 </div>
